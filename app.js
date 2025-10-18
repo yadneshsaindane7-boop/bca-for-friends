@@ -4,7 +4,7 @@ import { getFirestore, collection, doc, getDoc, getDocs, setDoc } from "https://
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-storage.js";
 import * as pdfjsLib from "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
 
-// Firebase config
+// Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyB9uMEWLK1lCDHFYx7OoBCGEqPfyckILEY",
   authDomain: "bca-notes-app.firebaseapp.com",
@@ -13,12 +13,13 @@ const firebaseConfig = {
   messagingSenderId: "398238473147",
   appId: "1:398238473147:web:59de2cb556ef47abf9829e"
 };
+
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 const storage = getStorage(app);
 
-// DOM references
+// DOM elements
 const loginDiv = document.getElementById('login');
 const dashboardDiv = document.getElementById('dashboard');
 const adminPanelDiv = document.getElementById('adminPanel');
@@ -54,7 +55,6 @@ sendLinkBtn.onclick = async () => {
   loginMsgP.textContent = '';
   const email = emailInput.value.trim();
   if (!email) return alert('Enter email');
-  // Use window.location.origin for valid continue url (must be authorized)
   const actionCodeSettings = {
     url: window.location.origin,
     handleCodeInApp: true,
@@ -163,9 +163,7 @@ function renderPdfList() {
     div.className = 'pdf-card';
     div.innerHTML = `
       <h4>${pdf.title || pdf.id}</h4>
-      <small>Uploaded: ${
-        pdf.uploadedAt?.toDate ? pdf.uploadedAt.toDate().toLocaleDateString() : ''
-      }</small><br/>
+      <small>Uploaded: ${pdf.uploadedAt?.toDate ? pdf.uploadedAt.toDate().toLocaleDateString() : ''}</small><br/>
       <button data-index="${index}">View</button>
     `;
     div.querySelector('button').onclick = () => viewPdf(index);
@@ -273,7 +271,7 @@ nextPageBtn.onclick = () => {
 };
 closeViewerBtn.onclick = closePdfViewer;
 
-// Prevent default right-click, print, save, and PrintScreen keys
+// Prevent right-click, print, save, and PrintScreen keys
 window.addEventListener('contextmenu', e => e.preventDefault());
 window.addEventListener('keydown', e => {
   if ((e.ctrlKey || e.metaKey) && ['p', 's'].includes(e.key.toLowerCase())) e.preventDefault();
