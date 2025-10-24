@@ -66,7 +66,7 @@ sendLinkBtn.addEventListener("click", async () => {
   const { error } = await supabase.auth.signInWithOtp({
     email: email,
     options: {
-      emailRedirectTo: window.location.origin,
+      emailRedirectTo: 'https://bca-for-friends.vercel.app',  // ← HARDCODED URL
     },
   });
 
