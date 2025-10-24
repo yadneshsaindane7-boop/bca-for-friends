@@ -1,279 +1,257 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
-import { getAuth, sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
-import { getFirestore, collection, doc, getDoc, getDocs, setDoc } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-storage.js";
-import * as pdfjsLib from "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
-// Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyB9uMEWLK1lCDHFYx7OoBCGEqPfyckILEY",
-  authDomain: "bca-notes-app.firebaseapp.com",
-  projectId: "bca-notes-app",
-  storageBucket: "bca-notes-app.appspot.com",
-  messagingSenderId: "398238473147",
-  appId: "1:398238473147:web:59de2cb556ef47abf9829e"
-};
+const supabaseUrl = "https://cvyqiwroddbbyqpyuayq.supabase.co";
+const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN2eXFpd3JvZGRiYnlxcHl1YXlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjEyOTU5NTQsImV4cCI6MjA3Njg3MTk1NH0.QT8li2H-32sE66UH2sZIBQlGye0dtfL_-LYgaR6yj8M";
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-const storage = getStorage(app);
+// DOM Elements
+const loginDiv = document.getElementById("login");
+const dashboardDiv = document.getElementById("dashboard");
+const adminPanelDiv = document.getElementById("adminPanel");
+const emailInput = document.getElementById("emailInput");
+const sendLinkBtn = document.getElementById("sendLinkBtn");
+const loginMsg = document.getElementById("loginMsg");
+const userEmailSpan = document.getElementById("userEmail");
+const logoutBtn = document.getElementById("logoutBtn");
+const pdfListDiv = document.getElementById("pdfList");
+const pdfTitleInput = document.getElementById("pdfTitle");
+const pdfFileInput = document.getElementById("pdfFile");
+const uploadPdfBtn = document.getElementById("uploadPdfBtn");
+const adminBtnContainer = document.getElementById("adminBtnContainer");
+const backToDashboardBtn = document.getElementById("backToDashboardBtn");
+const newEmailInput = document.getElementById("newEmailInput");
+const addEmailBtn = document.getElementById("addEmailBtn");
+const whitelistDisplay = document.getElementById("whitelistDisplay");
 
-// DOM elements
-const loginDiv = document.getElementById('login');
-const dashboardDiv = document.getElementById('dashboard');
-const adminPanelDiv = document.getElementById('adminPanel');
-const pdfViewerDiv = document.getElementById('pdfViewer');
-const userEmailSpan = document.getElementById('userEmail');
-const adminBtnContainer = document.getElementById('adminBtnContainer');
-const pdfListDiv = document.getElementById('pdfList');
-const pdfTitleInput = document.getElementById('pdfTitle');
-const pdfFileInput = document.getElementById('pdfFile');
-const uploadPdfBtn = document.getElementById('uploadPdfBtn');
-const newEmailInput = document.getElementById('newEmailInput');
-const addEmailBtn = document.getElementById('addEmailBtn');
-const whitelistDisplay = document.getElementById('whitelistDisplay');
-const backToDashboardBtn = document.getElementById('backToDashboardBtn');
-const emailInput = document.getElementById('emailInput');
-const sendLinkBtn = document.getElementById('sendLinkBtn');
-const logoutBtn = document.getElementById('logoutBtn');
-const loginMsgP = document.getElementById('loginMsg');
-const pdfCanvas = document.getElementById('pdfCanvas');
-const wmDiv = document.getElementById('wm');
-const pageNumDisplay = document.getElementById('pageNumDisplay');
-const prevPageBtn = document.getElementById('prevPageBtn');
-const nextPageBtn = document.getElementById('nextPageBtn');
-const closeViewerBtn = document.getElementById('closeViewerBtn');
+let currentUser = null;
 
-let currentUserEmail = null;
-let currentPdfList = [];
-let pdfDoc = null;
-let currentPage = 1;
-let totalPages = 0;
-
-sendLinkBtn.onclick = async () => {
-  loginMsgP.textContent = '';
-  const email = emailInput.value.trim();
-  if (!email) return alert('Enter email');
-  const actionCodeSettings = {
-    url: window.location.origin,
-    handleCodeInApp: true,
-  };
-  try {
-    await sendSignInLinkToEmail(auth, email, actionCodeSettings);
-    window.localStorage.setItem('emailForSignIn', email);
-    loginMsgP.style.color = 'green';
-    loginMsgP.textContent = 'Login link sent! Check your email.';
-  } catch (e) {
-    loginMsgP.style.color = 'red';
-    loginMsgP.textContent = 'Error sending link: ' + e.message;
-  }
-};
-
-if (isSignInWithEmailLink(auth, window.location.href)) {
-  let email = window.localStorage.getItem('emailForSignIn');
-  if (!email) {
-    email = prompt('Please provide your email for confirmation');
-  }
-  signInWithEmailLink(auth, email, window.location.href)
-    .then(() => {
-      window.localStorage.removeItem('emailForSignIn');
-    })
-    .catch(console.error);
-}
-
-onAuthStateChanged(auth, async user => {
-  if (user) {
-    currentUserEmail = user.email;
-    const allowed = await checkWhitelist(currentUserEmail);
-    if (!allowed) {
-      alert('Your email is not authorized to access this app.');
-      signOut(auth);
-      showLogin();
-      return;
-    }
-    userEmailSpan.textContent = currentUserEmail;
-    showDashboard();
-    await loadPdfList();
-    if (isAdmin(currentUserEmail)) {
-      adminBtnContainer.innerHTML = '<button id="openAdminBtn">Open Admin Panel</button>';
-      document.getElementById('openAdminBtn').onclick = showAdminPanel;
-    } else {
-      adminBtnContainer.innerHTML = '';
-    }
-  } else {
-    currentUserEmail = null;
-    showLogin();
-  }
-});
-
-logoutBtn.onclick = () => {
-  signOut(auth);
-};
-
-function showLogin() {
-  loginDiv.style.display = 'block';
-  dashboardDiv.style.display = 'none';
-  adminPanelDiv.style.display = 'none';
-  pdfViewerDiv.style.display = 'none';
-}
-
-function showDashboard() {
-  loginDiv.style.display = 'none';
-  dashboardDiv.style.display = 'block';
-  adminPanelDiv.style.display = 'none';
-  pdfViewerDiv.style.display = 'none';
-  renderPdfList();
-}
-
-function showAdminPanel() {
-  loginDiv.style.display = 'none';
-  dashboardDiv.style.display = 'none';
-  adminPanelDiv.style.display = 'block';
-  pdfViewerDiv.style.display = 'none';
-  listWhitelist();
-}
-
+// Check if user is admin
 function isAdmin(email) {
   return email === 'yadneshsaindane7@gmail.com';
 }
 
-async function checkWhitelist(email) {
-  const docRef = doc(db, 'whitelist', email);
-  const docSnap = await getDoc(docRef);
-  return docSnap.exists();
+// Show/Hide sections
+function showLogin() {
+  loginDiv.style.display = "block";
+  dashboardDiv.style.display = "none";
+  adminPanelDiv.style.display = "none";
 }
 
-async function loadPdfList() {
-  pdfListDiv.textContent = 'Loading PDFs...';
-  const querySnap = await getDocs(collection(db, 'pdfs'));
-  currentPdfList = [];
-  querySnap.forEach(docSnap => currentPdfList.push({ id: docSnap.id, ...docSnap.data() }));
-  renderPdfList();
+function showDashboard() {
+  loginDiv.style.display = "none";
+  dashboardDiv.style.display = "block";
+  adminPanelDiv.style.display = "none";
+  loadPdfs();
 }
 
-function renderPdfList() {
-  if (currentPdfList.length === 0) {
-    pdfListDiv.innerHTML = '<p>No PDFs uploaded yet.</p>';
+function showAdminPanel() {
+  loginDiv.style.display = "none";
+  dashboardDiv.style.display = "none";
+  adminPanelDiv.style.display = "block";
+  loadWhitelist();
+}
+
+// Send magic link
+sendLinkBtn.addEventListener("click", async () => {
+  const email = emailInput.value.trim();
+  if (!email) {
+    loginMsg.textContent = "Please enter your email";
+    loginMsg.style.color = "red";
     return;
   }
-  pdfListDiv.innerHTML = '';
-  currentPdfList.forEach((pdf, index) => {
-    const div = document.createElement('div');
-    div.className = 'pdf-card';
-    div.innerHTML = `
-      <h4>${pdf.title || pdf.id}</h4>
-      <small>Uploaded: ${pdf.uploadedAt?.toDate ? pdf.uploadedAt.toDate().toLocaleDateString() : ''}</small><br/>
-      <button data-index="${index}">View</button>
+
+  loginMsg.textContent = "Sending magic link...";
+  loginMsg.style.color = "blue";
+
+  const { error } = await supabase.auth.signInWithOtp({
+    email: email,
+    options: {
+      emailRedirectTo: window.location.origin,
+    },
+  });
+
+  if (error) {
+    loginMsg.textContent = "Error: " + error.message;
+    loginMsg.style.color = "red";
+  } else {
+    loginMsg.textContent = "Magic link sent! Check your email.";
+    loginMsg.style.color = "green";
+  }
+});
+
+// Monitor auth state
+supabase.auth.onAuthStateChange(async (event, session) => {
+  if (session) {
+    currentUser = session.user;
+    userEmailSpan.textContent = currentUser.email;
+    
+    // Check if user is in whitelist
+    const { data, error } = await supabase
+      .from('whitelist')
+      .select('*')
+      .eq('email', currentUser.email)
+      .single();
+    
+    if (!data && !isAdmin(currentUser.email)) {
+      alert('Your email is not whitelisted. Please contact admin.');
+      await supabase.auth.signOut();
+      return;
+    }
+    
+    // Show admin button if admin
+    if (isAdmin(currentUser.email)) {
+      adminBtnContainer.innerHTML = '<button id="openAdminBtn" style="margin:10px;">Admin Panel</button>';
+      document.getElementById('openAdminBtn').addEventListener('click', showAdminPanel);
+    } else {
+      adminBtnContainer.innerHTML = '';
+    }
+    
+    showDashboard();
+  } else {
+    currentUser = null;
+    showLogin();
+  }
+});
+
+// Logout
+logoutBtn.addEventListener("click", async () => {
+  await supabase.auth.signOut();
+});
+
+// Back to dashboard
+backToDashboardBtn.addEventListener("click", showDashboard);
+
+// Load PDFs
+async function loadPdfs() {
+  pdfListDiv.innerHTML = "Loading PDFs...";
+  
+  const { data, error } = await supabase
+    .from('pdfs')
+    .select('*')
+    .order('created_at', { ascending: false });
+  
+  if (error) {
+    pdfListDiv.innerHTML = "Error loading PDFs: " + error.message;
+    return;
+  }
+  
+  if (!data || data.length === 0) {
+    pdfListDiv.innerHTML = "<p>No PDFs uploaded yet.</p>";
+    return;
+  }
+  
+  pdfListDiv.innerHTML = "";
+  data.forEach(pdf => {
+    const card = document.createElement("div");
+    card.className = "pdf-card";
+    card.innerHTML = `
+      <h3>${pdf.title}</h3>
+      <small>Uploaded: ${new Date(pdf.created_at).toLocaleDateString()}</small><br/>
+      <button onclick="window.open('${pdf.url}', '_blank')">View PDF</button>
     `;
-    div.querySelector('button').onclick = () => viewPdf(index);
-    pdfListDiv.appendChild(div);
+    pdfListDiv.appendChild(card);
   });
 }
 
-uploadPdfBtn.onclick = async () => {
+// Upload PDF
+uploadPdfBtn.addEventListener("click", async () => {
   const file = pdfFileInput.files[0];
   const title = pdfTitleInput.value.trim();
-  if (!file) return alert('Choose a PDF file first');
-  if (!title) return alert('Enter PDF title');
-  const storageRef = ref(storage, `pdfs/${Date.now()}_${file.name}`);
-  try {
-    await uploadBytes(storageRef, file);
-    const url = await getDownloadURL(storageRef);
-    await setDoc(doc(db, 'pdfs', storageRef.name), {
-      title: title,
-      url: url,
-      uploadedAt: new Date(),
-    });
-    alert('PDF uploaded!');
-    await loadPdfList();
-    pdfTitleInput.value = '';
-    pdfFileInput.value = '';
-  } catch (e) {
-    alert('Upload failed: ' + e.message);
+  
+  if (!file) {
+    alert("Please select a PDF file");
+    return;
   }
-};
-
-addEmailBtn.onclick = async () => {
-  const email = newEmailInput.value.trim();
-  if (!email) return alert('Enter email');
-  try {
-    await setDoc(doc(db, 'whitelist', email), { addedAt: new Date() });
-    newEmailInput.value = '';
-    listWhitelist();
-    alert('Email added to whitelist');
-  } catch (e) {
-    alert('Failed: ' + e.message);
+  
+  if (!title) {
+    alert("Please enter a title");
+    return;
   }
-};
+  
+  uploadPdfBtn.textContent = "Uploading...";
+  uploadPdfBtn.disabled = true;
+  
+  try {
+    // Generate unique filename
+    const fileName = `${Date.now()}_${file.name}`;
+    
+    // Upload to storage
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from('pdfs')
+      .upload(fileName, file);
+    
+    if (uploadError) throw uploadError;
+    
+    // Get public URL
+    const { data: urlData } = supabase.storage
+      .from('pdfs')
+      .getPublicUrl(fileName);
+    
+    const publicURL = urlData.publicUrl;
+    
+    // Save to database
+    const { error: dbError } = await supabase
+      .from('pdfs')
+      .insert([{ title, url: publicURL }]);
+    
+    if (dbError) throw dbError;
+    
+    alert("PDF uploaded successfully!");
+    pdfTitleInput.value = "";
+    pdfFileInput.value = "";
+    showDashboard();
+    
+  } catch (error) {
+    alert("Upload failed: " + error.message);
+  } finally {
+    uploadPdfBtn.textContent = "Upload PDF";
+    uploadPdfBtn.disabled = false;
+  }
+});
 
-async function listWhitelist() {
-  whitelistDisplay.innerHTML = 'Loading whitelist...';
-  const querySnap = await getDocs(collection(db, 'whitelist'));
-  whitelistDisplay.innerHTML = '';
-  querySnap.forEach(docSnap => {
-    const li = document.createElement('li');
-    li.textContent = docSnap.id;
+// Load whitelist
+async function loadWhitelist() {
+  whitelistDisplay.innerHTML = "Loading...";
+  
+  const { data, error } = await supabase
+    .from('whitelist')
+    .select('*')
+    .order('added_at', { ascending: false });
+  
+  if (error) {
+    whitelistDisplay.innerHTML = "Error: " + error.message;
+    return;
+  }
+  
+  whitelistDisplay.innerHTML = "";
+  data.forEach(item => {
+    const li = document.createElement("li");
+    li.textContent = item.email;
     whitelistDisplay.appendChild(li);
   });
 }
 
-async function viewPdf(index) {
-  const pdf = currentPdfList[index];
-  showPdfViewer();
-  wmDiv.textContent = currentUserEmail;
-  try {
-    const loadingTask = pdfjsLib.getDocument(pdf.url);
-    pdfDoc = await loadingTask.promise;
-    totalPages = pdfDoc.numPages;
-    currentPage = 1;
-    renderPage(currentPage);
-  } catch (e) {
-    alert('Failed to load PDF: ' + e.message);
-    closePdfViewer();
+// Add email to whitelist
+addEmailBtn.addEventListener("click", async () => {
+  const email = newEmailInput.value.trim();
+  
+  if (!email) {
+    alert("Please enter an email");
+    return;
   }
-}
-
-async function renderPage(num) {
-  if (!pdfDoc) return;
-  const page = await pdfDoc.getPage(num);
-  const viewport = page.getViewport({ scale: 1.4 });
-  const context = pdfCanvas.getContext('2d');
-  pdfCanvas.height = viewport.height;
-  pdfCanvas.width = viewport.width;
-  await page.render({ canvasContext: context, viewport: viewport }).promise;
-  pageNumDisplay.textContent = `${num} / ${totalPages}`;
-}
-
-function showPdfViewer() {
-  pdfViewerDiv.style.display = 'flex';
-  dashboardDiv.style.display = 'none';
-  adminPanelDiv.style.display = 'none';
-}
-
-function closePdfViewer() {
-  pdfViewerDiv.style.display = 'none';
-  dashboardDiv.style.display = 'block';
-  pdfDoc = null;
-}
-
-prevPageBtn.onclick = () => {
-  if (currentPage > 1) {
-    currentPage--;
-    renderPage(currentPage);
+  
+  const { error } = await supabase
+    .from('whitelist')
+    .insert([{ email }]);
+  
+  if (error) {
+    alert("Error: " + error.message);
+  } else {
+    alert("Email added to whitelist!");
+    newEmailInput.value = "";
+    loadWhitelist();
   }
-};
-nextPageBtn.onclick = () => {
-  if (currentPage < totalPages) {
-    currentPage++;
-    renderPage(currentPage);
-  }
-};
-closeViewerBtn.onclick = closePdfViewer;
-
-// Prevent right-click, print, save, and PrintScreen keys
-window.addEventListener('contextmenu', e => e.preventDefault());
-window.addEventListener('keydown', e => {
-  if ((e.ctrlKey || e.metaKey) && ['p', 's'].includes(e.key.toLowerCase())) e.preventDefault();
-  if (e.key === 'PrintScreen') e.preventDefault();
 });
+
+// Initialize
+showLogin();
