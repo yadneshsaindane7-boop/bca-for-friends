@@ -1,93 +1,153 @@
 body {
-  font-family: Arial, sans-serif;
+  font-family: 'Nunito', 'Quicksand', Arial, sans-serif;
   margin: 0;
-  background: #f0f4f9;
-  color: #333;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(120deg, #a1c4fd 0%, #c2e9fb 100%);
+  background-size: 400% 400%;
+  animation: bgMove 16s linear infinite;
+  color: #1c2541;
 }
+
+@keyframes bgMove {
+  0%{background-position:0% 50%;}
+  50%{background-position:100% 50%;}
+  100%{background-position:0% 50%;}
+}
+
 header {
-  background: #0056b3;
+  background: rgba(90, 137, 255, 0.85);
   color: #fff;
-  padding: 15px;
+  padding: 16px 0;
   text-align: center;
-  font-size: 22px;
+  font-size: 2rem;
+  letter-spacing: 1px;
+  box-shadow: 0 6px 32px 0 rgba(62, 74, 145, 0.14);
 }
-#login, #dashboard, #adminPanel, #pdfViewer {
+
+#dashboard,
+#adminPanel,
+#login,
+#pdfViewer {
   display: none;
-  padding: 20px;
+  margin: 36px auto;
+  width: 96%;
+  max-width: 540px;
+  background: rgba(255,255,255,0.32);
+  padding: 36px 32px;
+  border-radius: 24px;
+  box-shadow: 0 8px 40px 0 rgba(90,137,255,0.13);
+  backdrop-filter: blur(11px);
+  text-align: center;
 }
+
 input, button {
-  padding: 10px;
-  margin: 5px;
+  font-family: inherit;
+  padding: 13px 20px;
+  margin: 10px 4px;
   border: none;
-  border-radius: 5px;
+  border-radius: 28px;
+  font-size: 1.04rem;
+  outline: none;
 }
+
 button {
-  background: #0056b3;
+  background: linear-gradient(45deg,#5aa2ff,#94d0ff);
   color: #fff;
+  font-weight: 600;
+  box-shadow: 0 3px 18px 0 rgba(90,138,255,0.15);
   cursor: pointer;
+  transition: transform 0.18s, box-shadow 0.22s, background 0.22s;
 }
-button:hover {
-  background: #007bff;
+
+button:hover, button:focus {
+  background: linear-gradient(45deg,#5472fa,#8dc6ff);
+  box-shadow: 0 4px 32px 0 rgba(90,138,255,0.21);
+  transform: scale(1.05);
 }
+
+.notice {
+  color: #11a8ab;
+  font-size: 1.01rem;
+  margin: 18px 0 8px 0;
+  opacity: 0.92;
+}
+
 .pdf-card {
-  background: #fff;
-  padding: 10px;
-  margin: 8px;
-  border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-  max-width: 250px;
+  background: rgba(250,255,255,0.89);
+  color: #1c2541;
+  border-radius: 12px;
+  box-shadow: 0 2px 16px 0 rgba(90,137,255,0.09);
+  margin: 14px;
+  padding: 18px 10px;
+  display: inline-block;
+  max-width: 260px;
 }
+
 .grid {
   display: flex;
   flex-wrap: wrap;
-  gap: 15px;
-}
-.viewer-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: #000a;
-  display: none;
+  gap: 18px;
   justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  z-index: 1000;
-}
-canvas {
-  border: 1px solid #ccc;
-  background: #fff;
-  max-width: 90vw;
-  max-height: 80vh;
-  border-radius: 5px;
-}
-.nav-controls {
-  margin-top: 10px;
-  color: #fff;
-  text-align: center;
-}
-.watermark {
-  position: absolute;
-  opacity: 0.15;
-  font-size: 28px;
-  color: red;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%) rotate(-30deg);
-  user-select: none;
-  pointer-events: none;
-}
-.notice {
-  color: red;
-  font-size: 14px;
-  max-width: 500px;
   margin: 20px auto;
 }
-ul {
-  list-style: none;
-  padding-left: 0;
+
+.viewer-overlay {
+  background: rgba(176, 219, 255, 0.91);
 }
-ul li {
-  margin: 4px 0;
+
+.watermark {
+  color: #5aa2ff;
+  opacity: 0.13;
+  font-size: 34px;
+  font-family: monospace, 'Nunito', cursive;
+}
+
+::-webkit-scrollbar {
+  width: 9px; background: #ecefff;
+  border-radius: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: #bfd7ff;
+  border-radius: 8px;
+}
+
+/* Make any h2/h3 title look playful but not the same as your inspiration */
+h2, h3 {
+  font-family: 'Nunito', 'Quicksand', cursive, sans-serif;
+  color: #4169e1;
+  letter-spacing: 0.5px;
+  margin-bottom: 16px;
+}
+
+input[type="file"] {
+  padding: 7px 0;
+  border-radius: 22px;
+  background: #f3f8ff;
+  color: #263159;
+  font-family: inherit;
+  margin-bottom: 18px;
+}
+
+input[type="text"], input[type="email"] {
+  background: #f8fafc;
+  color: #233143;
+  border: 1px solid #cde6ff;
+}
+
+input:focus {
+  border: 1.7px solid #5aa2ff;
+  background: #eef7ff;
+}
+
+@media (max-width: 620px) {
+  #dashboard, #adminPanel, #login, #pdfViewer {
+    padding: 20px 4vw;
+    width: 98vw;
+  }
+
+  .pdf-card {
+    max-width: 90vw;
+  }
 }
