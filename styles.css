@@ -192,4 +192,66 @@ input:focus {
   from { opacity: 0;}
   to { opacity: 1;}
 }
+/* PDF Viewer Styles */
+#pdfViewer {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(30, 30, 30, 0.85); /* Fixed: Not too dark */
+  backdrop-filter: blur(8px);
+  animation: fadeIn 0.3s ease;
+}
 
+#pdfCanvas {
+  background: #ffffff; /* Fixed: White background for PDF pages */
+  border-radius: 12px;
+  box-shadow: 0 10px 50px rgba(0, 0, 0, 0.4);
+  border: 2px solid #4f9cf9;
+  max-width: 95vw;
+  max-height: 85vh;
+  object-fit: contain;
+}
+
+#closePdfBtn {
+  margin-top: 20px;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+  transition: all 0.3s ease;
+}
+
+#closePdfBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+}
+
+.view-pdf-btn {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.view-pdf-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(79, 172, 254, 0.4);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
