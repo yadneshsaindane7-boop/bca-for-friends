@@ -1,4 +1,3 @@
-/* ============ MAIN BACKGROUND & BODY ============ */
 body {
   font-family: 'Nunito', 'Quicksand', Arial, sans-serif;
   margin: 0;
@@ -17,7 +16,6 @@ body {
   100% { background-position: 0% 50%; }
 }
 
-/* ============ HEADER ============ */
 header {
   background: rgba(90, 137, 255, 0.85);
   color: #fff;
@@ -28,11 +26,8 @@ header {
   box-shadow: 0 6px 32px 0 rgba(62, 74, 145, 0.14);
 }
 
-/* ============ SECTION CONTAINERS ============ */
-#dashboard,
-#adminPanel,
-#login,
-#pdfViewer {
+/* Containers */
+#dashboard, #adminPanel, #login, #pdfViewer {
   display: none;
   margin: 36px auto;
   width: 96%;
@@ -45,7 +40,6 @@ header {
   text-align: center;
 }
 
-/* ============ INPUTS & BUTTONS ============ */
 input, button {
   font-family: inherit;
   padding: 13px 20px;
@@ -57,21 +51,20 @@ input, button {
 }
 
 button {
-  background: linear-gradient(45deg,#5aa2ff,#94d0ff);
+  background: linear-gradient(45deg, #5aa2ff, #94d0ff);
   color: #fff;
   font-weight: 600;
   box-shadow: 0 3px 18px 0 rgba(90,138,255,0.15);
   cursor: pointer;
   transition: transform 0.18s, box-shadow 0.22s, background 0.22s;
 }
-
 button:hover, button:focus {
-  background: linear-gradient(45deg,#5472fa,#8dc6ff);
+  background: linear-gradient(45deg, #5472fa, #8dc6ff);
   box-shadow: 0 4px 32px 0 rgba(90,138,255,0.21);
   transform: scale(1.05);
 }
 
-input[type="file"] {
+input[type=file] {
   padding: 7px 0;
   border-radius: 22px;
   background: #f3f8ff;
@@ -79,19 +72,22 @@ input[type="file"] {
   font-family: inherit;
   margin-bottom: 18px;
 }
-
-input[type="text"], input[type="email"] {
+input[type=text], input[type=email], input[type=password] {
   background: #f8fafc;
   color: #233143;
   border: 1px solid #cde6ff;
 }
-
 input:focus {
   border: 1.7px solid #5aa2ff;
   background: #eef7ff;
 }
 
-/* ============ NOTICE TEXTS ============ */
+small {
+  display: block;
+  margin-top: 6px;
+  color: #354b87;
+}
+
 .notice {
   color: #11a8ab;
   font-size: 1.01rem;
@@ -99,7 +95,7 @@ input:focus {
   opacity: 0.92;
 }
 
-/* ============ PDF GRID CARDS ============ */
+/* PDF Cards/Grid */
 .pdf-card {
   background: rgba(250,255,255,0.89);
   color: #1c2541;
@@ -110,7 +106,6 @@ input:focus {
   display: inline-block;
   max-width: 260px;
 }
-
 .grid {
   display: flex;
   flex-wrap: wrap;
@@ -119,37 +114,7 @@ input:focus {
   margin: 20px auto;
 }
 
-/* ============ SCROLLBAR ============ */
-::-webkit-scrollbar {
-  width: 9px;
-  background: #ecefff;
-  border-radius: 8px;
-}
-::-webkit-scrollbar-thumb {
-  background: #bfd7ff;
-  border-radius: 8px;
-}
-
-/* ============ HEADINGS ============ */
-h2, h3 {
-  font-family: 'Nunito', 'Quicksand', cursive, sans-serif;
-  color: #4169e1;
-  letter-spacing: 0.5px;
-  margin-bottom: 16px;
-}
-
-/* ============ RESPONSIVE ============ */
-@media (max-width: 620px) {
-  #dashboard, #adminPanel, #login, #pdfViewer {
-    padding: 20px 4vw;
-    width: 98vw;
-  }
-  .pdf-card {
-    max-width: 90vw;
-  }
-}
-
-/* ============ PDF VIEWER (MODAL) ============ */
+/* PDF Viewer Modal */
 #pdfViewer {
   position: fixed;
   inset: 0;
@@ -165,7 +130,7 @@ h2, h3 {
   animation: fadeIn 0.65s ease;
 }
 
-.pageCanvas {
+#pdfViewer .pageCanvas {
   border-radius: 16px;
   box-shadow: 0 10px 50px 0 rgba(0,10,63,0.35);
   border: 1.8px solid #1467bb;
@@ -174,37 +139,11 @@ h2, h3 {
   max-width: 92vw;
 }
 
-#pdfViewer button {
-  margin: 24px auto;
-  font-size: 1rem;
-  padding: 12px 26px;
-  background: linear-gradient(90deg, #2186eb, #665efc);
-  color: #fff;
-  border: none;
-  border-radius: 10px;
-  box-shadow: 0 4px 22px #1d428d33;
-  transition: background .2s;
-  cursor: pointer;
-  font-weight: 600;
-}
-
-#pdfViewer button:hover {
-  background: linear-gradient(90deg, #1762a7, #4d4398);
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: scale(0.96); }
-  to { opacity: 1; transform: scale(1); }
-}
-
-/* ============ WATERMARK STYLE (reference class only if needed) ============ */
-.watermark {
-  font-family: monospace, 'Nunito', cursive;
-  font-size: 36px;
-  font-weight: 700;
-  color: #ff3333;
-  opacity: 0.18;
-  text-transform: lowercase;
-  pointer-events: none;
-  user-select: none;
+/* Responsive */
+@media (max-width: 620px) {
+  #dashboard, #adminPanel, #login, #pdfViewer {
+    padding: 20px 4vw;
+    width: 98vw;
+  }
+  .pdf-card { max-width: 90vw; }
 }
