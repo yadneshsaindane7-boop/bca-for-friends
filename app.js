@@ -110,64 +110,32 @@ loginBtn.addEventListener("click", async () => {
     loginMsg.style.color = "red";
     return;
   }
+  // Clear the message after successful login
+  loginMsg.textContent = "";
 });
 
-// --- Auth State and Whitelist Check (with email normalization and better error handling) ---
+// --- Auth State (NO WHITELIST CHECK - if user can login, they're authorized) ---
 supabase.auth.onAuthStateChange(async (event, session) => {
   console.log("Auth state changed:", event, session);
   
   if (session) {
     currentUser = session.user;
     userEmailSpan.textContent = currentUser.email;
+    console.log("User logged in:", currentUser.email);
 
-    const normalizedEmail = currentUser.email.trim().toLowerCase();
-    console.log("Normalized email for whitelist check:", normalizedEmail);
-    console.log("Is admin?", isAdmin(currentUser.email));
-
-    // Skip whitelist check for admin
+    // Check if admin
     if (isAdmin(currentUser.email)) {
-      console.log("Admin login detected, bypassing whitelist check");
+      console.log("Admin login detected");
       adminBtnContainer.innerHTML = `<button id="openAdminBtn">Admin Panel</button>`;
       document
         .getElementById("openAdminBtn")
         .addEventListener("click", showAdminPanel);
-      showDashboard();
-      return;
-    }
-
-    // For non-admin users, check whitelist
-    try {
-      const { data, error } = await supabase
-        .from("whitelist")
-        .select("*")
-        .eq("email", normalizedEmail)
-        .maybeSingle(); // Use maybeSingle instead of single to avoid error if no match
-
-      console.log("Whitelist lookup result:", data, "Error:", error);
-
-      if (error) {
-        console.error("Whitelist query error:", error);
-        alert("Error checking whitelist. Please contact admin.");
-        await supabase.auth.signOut();
-        return;
-      }
-
-      if (!data) {
-        console.log("Email not found in whitelist");
-        alert("Your email is not whitelisted. Contact admin.");
-        await supabase.auth.signOut();
-        return;
-      }
-
-      console.log("Whitelist check passed for:", normalizedEmail);
+    } else {
       adminBtnContainer.innerHTML = "";
-      showDashboard();
-      
-    } catch (err) {
-      console.error("Whitelist check exception:", err);
-      alert("Error during login. Please try again.");
-      await supabase.auth.signOut();
     }
+
+    // Show dashboard for ALL authenticated users
+    showDashboard();
   } else {
     showLogin();
   }
@@ -270,30 +238,20 @@ uploadPdfBtn.addEventListener("click", async () => {
   uploadPdfBtn.disabled = false;
 });
 
-// --- Whitelist Management (Admin) ---
+// --- Whitelist Management (Admin) - Now adds users to Supabase Auth ---
 addEmailBtn.addEventListener("click", async () => {
   const email = newEmailInput.value.trim().toLowerCase();
-  if (!email) return;
+  if (!email) return alert("Please enter an email");
   
-  console.log("Adding email to whitelist:", email);
-  const { error } = await supabase.from("whitelist").insert([{ email }]);
-  
-  if (error) {
-    console.error("Error adding email:", error);
-    alert("Error adding email: " + error.message);
-    return;
-  }
-  
+  // Note: You'll need to manually create users in Supabase Auth dashboard
+  // This button now just shows the list
+  alert("Please add users via Supabase Dashboard → Authentication → Users → Add User");
   newEmailInput.value = "";
-  alert(`Email ${email} added to whitelist successfully!`);
-  loadWhitelist();
 });
 
 async function loadWhitelist() {
-  const { data } = await supabase.from("whitelist").select("*");
-  whitelistDisplay.innerHTML = (data || [])
-    .map((e) => `<li>${e.email}</li>`)
-    .join("");
+  // This now shows all auth users instead of whitelist table
+  whitelistDisplay.innerHTML = "<li>View users in Supabase Dashboard → Authentication → Users</li>";
 }
 
 // --- Loading Indicator Util ---
