@@ -11,12 +11,15 @@
 
   <!-- Login Section -->
   <div id="login">
-    <h2>Login with your email</h2>
-    <input type="email" id="emailInput" placeholder="Enter your email" />
-    <button id="sendLinkBtn">Send Login Link</button>
-    <p id="loginMsg"></p>
-    <small>Use the whitelisted email registered by admin.</small>
-  </div>
+  <h2>Login with your email & password</h2>
+  <input type="email" id="emailInput" placeholder="Enter your email" autocomplete="username" />
+  <input type="password" id="passwordInput" placeholder="Enter password" autocomplete="current-password" />
+  <button id="loginBtn">Login</button>
+  <p id="loginMsg"></p>
+  <!-- NO forgot/reset password link shown -->
+  <small>Use the credentials provided by the admin.</small>
+</div>
+
 
   <!-- Dashboard -->
   <div id="dashboard">
