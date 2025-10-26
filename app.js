@@ -1,11 +1,11 @@
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
-// Your project credentials with the provided key
+// Project credentials
 const supabaseUrl = "https://cvyqiwroddbbyqpyuayq.supabase.co";
 const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN2eXFpd3JvZGRiYnlxcHl1YXlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjEyOTU5NTQsImV4cCI6MjA3Njg3MTk1NH0.QT8li2H-32sE66UH2sZIBQlGye0dtfL_-LYgaR6yj8M";
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-// Configure PDF.js worker
+// PDF.js
 const script = document.createElement("script");
 script.src = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
 script.onload = () => {
@@ -34,7 +34,7 @@ const loginDiv = document.getElementById("login"),
   addEmailBtn = document.getElementById("addEmailBtn"),
   whitelistDisplay = document.getElementById("whitelistDisplay");
 
-// Create PDF viewer container
+// PDF viewer
 const pdfViewerDiv = document.createElement("div");
 pdfViewerDiv.id = "pdfViewer";
 document.body.appendChild(pdfViewerDiv);
@@ -50,7 +50,7 @@ let pdfDoc = null;
 // Admin checker
 const isAdmin = (email) => email === "yadneshsaindane7@gmail.com";
 
-// Show sections
+// UI show/hide
 function showLogin() {
   loginDiv.style.display = "block";
   dashboardDiv.style.display = "none";
@@ -70,7 +70,7 @@ function showAdminPanel() {
 }
 closeBtn.addEventListener("click", showDashboard);
 
-// Password login logic
+// Password login logic and debug
 loginBtn.addEventListener("click", async () => {
   const email = emailInput.value.trim();
   const password = passwordInput.value;
@@ -92,20 +92,26 @@ loginBtn.addEventListener("click", async () => {
     loginMsg.style.color = "red";
     return;
   }
-  // Auth state monitoring will handle the rest
+
+  // Note: onAuthStateChange will handle the session
 });
 
-// Monitor login session
-supabase.auth.onAuthStateChange(async (_, session) => {
+// Monitor Auth state and whitelist check (with debug)
+supabase.auth.onAuthStateChange(async (event, session) => {
+  console.log("Auth state changed:", event, session);
+
   if (session) {
     currentUser = session.user;
     userEmailSpan.textContent = currentUser.email;
+    console.log("Current user/email for whitelist:", currentUser.email);
 
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("whitelist")
       .select("*")
       .eq("email", currentUser.email)
       .single();
+
+    console.log("Whitelist lookup result:", data, "Error:", error);
 
     if (!data && !isAdmin(currentUser.email)) {
       alert("Your email is not whitelisted. Contact admin.");
@@ -121,7 +127,9 @@ supabase.auth.onAuthStateChange(async (_, session) => {
     } else adminBtnContainer.innerHTML = "";
 
     showDashboard();
-  } else showLogin();
+  } else {
+    showLogin();
+  }
 });
 
 // Logout
