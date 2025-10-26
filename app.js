@@ -1,11 +1,11 @@
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
-// Project credentials
+// --- Supabase config ---
 const supabaseUrl = "https://cvyqiwroddbbyqpyuayq.supabase.co";
 const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN2eXFpd3JvZGRiYnlxcHl1YXlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjEyOTU5NTQsImV4cCI6MjA3Njg3MTk1NH0.QT8li2H-32sE66UH2sZIBQlGye0dtfL_-LYgaR6yj8M";
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-// PDF.js
+// --- PDF.js worker setup ---
 const script = document.createElement("script");
 script.src = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
 script.onload = () => {
@@ -14,7 +14,7 @@ script.onload = () => {
 };
 document.head.appendChild(script);
 
-// DOM elements
+// --- DOM References ---
 const loginDiv = document.getElementById("login"),
   dashboardDiv = document.getElementById("dashboard"),
   adminPanelDiv = document.getElementById("adminPanel"),
@@ -34,9 +34,15 @@ const loginDiv = document.getElementById("login"),
   addEmailBtn = document.getElementById("addEmailBtn"),
   whitelistDisplay = document.getElementById("whitelistDisplay");
 
-// PDF viewer
+if (!loginDiv || !dashboardDiv || !adminPanelDiv) {
+  alert("HTML structure missing required divs. Please check your index.html.");
+  throw new Error("Missing main divs");
+}
+
+// --- PDF viewer setup ---
 const pdfViewerDiv = document.createElement("div");
 pdfViewerDiv.id = "pdfViewer";
+pdfViewerDiv.style.display = "none";
 document.body.appendChild(pdfViewerDiv);
 
 const closeBtn = document.createElement("button");
@@ -44,33 +50,38 @@ closeBtn.id = "closePdfBtn";
 closeBtn.textContent = "Close PDF Viewer";
 pdfViewerDiv.appendChild(closeBtn);
 
+// --- App State ---
 let currentUser = null;
 let pdfDoc = null;
 
-// Admin checker
+// --- Admin Email ---
 const isAdmin = (email) => email === "yadneshsaindane7@gmail.com";
 
-// UI show/hide
+// --- UI Show/Hide Functions ---
 function showLogin() {
   loginDiv.style.display = "block";
   dashboardDiv.style.display = "none";
   adminPanelDiv.style.display = "none";
+  pdfViewerDiv.style.display = "none";
 }
 function showDashboard() {
   loginDiv.style.display = "none";
   dashboardDiv.style.display = "block";
   adminPanelDiv.style.display = "none";
+  pdfViewerDiv.style.display = "none";
   loadPdfs();
 }
 function showAdminPanel() {
   loginDiv.style.display = "none";
   dashboardDiv.style.display = "none";
   adminPanelDiv.style.display = "block";
+  pdfViewerDiv.style.display = "none";
   loadWhitelist();
 }
 closeBtn.addEventListener("click", showDashboard);
+if (backToDashboardBtn) backToDashboardBtn.addEventListener("click", showDashboard);
 
-// Password login logic and debug
+// --- Login Logic ---
 loginBtn.addEventListener("click", async () => {
   const email = emailInput.value.trim();
   const password = passwordInput.value;
@@ -81,36 +92,32 @@ loginBtn.addEventListener("click", async () => {
   }
   loginMsg.textContent = "Logging in...";
   loginMsg.style.color = "blue";
-
+  
   const { error } = await supabase.auth.signInWithPassword({
     email,
-    password,
+    password
   });
-
   if (error) {
     loginMsg.textContent = "Login failed: " + error.message;
     loginMsg.style.color = "red";
     return;
   }
-
-  // Note: onAuthStateChange will handle the session
+  // Session event will handle the rest
 });
 
-// Monitor Auth state and whitelist check (with debug)
+// --- Auth State and Whitelist Check ---
 supabase.auth.onAuthStateChange(async (event, session) => {
+  // Debug log
   console.log("Auth state changed:", event, session);
-
   if (session) {
     currentUser = session.user;
     userEmailSpan.textContent = currentUser.email;
-    console.log("Current user/email for whitelist:", currentUser.email);
-
+    // Whitelist check for user
     const { data, error } = await supabase
       .from("whitelist")
       .select("*")
       .eq("email", currentUser.email)
       .single();
-
     console.log("Whitelist lookup result:", data, "Error:", error);
 
     if (!data && !isAdmin(currentUser.email)) {
@@ -132,19 +139,19 @@ supabase.auth.onAuthStateChange(async (event, session) => {
   }
 });
 
-// Logout
+// --- Logout ---
 logoutBtn.addEventListener("click", async () => await supabase.auth.signOut());
 
-// Load PDFs
+// --- PDFs ---
 async function loadPdfs() {
   pdfListDiv.innerHTML = "Loading...";
   const { data } = await supabase
     .from("pdfs")
     .select("*")
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false }) || { data: [] };
 
   pdfListDiv.innerHTML = "";
-  data.forEach((pdf) => {
+  (data || []).forEach((pdf) => {
     const card = document.createElement("div");
     card.className = "pdf-card";
     card.innerHTML = `<h3>${pdf.title}</h3>
@@ -155,7 +162,7 @@ async function loadPdfs() {
   });
 }
 
-// Secure PDF Viewer (All pages + bold watermark)
+// --- PDF Viewer Logic ---
 async function viewPdf(url) {
   showLoading(pdfViewerDiv, true);
 
@@ -163,10 +170,10 @@ async function viewPdf(url) {
   pdfDoc = await loadingTask.promise;
   pdfViewerDiv.style.display = "flex";
   dashboardDiv.style.display = "none";
+  adminPanelDiv.style.display = "none";
 
   pdfViewerDiv.querySelectorAll("canvas.pageCanvas").forEach((c) => c.remove());
 
-  // Render each page
   for (let num = 1; num <= pdfDoc.numPages; num++) {
     const page = await pdfDoc.getPage(num);
     const viewport = page.getViewport({ scale: 1.2 });
@@ -197,7 +204,7 @@ async function viewPdf(url) {
   showLoading(pdfViewerDiv, false);
 }
 
-// Upload PDFs
+// --- PDF Upload ---
 uploadPdfBtn.addEventListener("click", async () => {
   const file = pdfFileInput.files[0];
   const title = pdfTitleInput.value.trim();
@@ -211,7 +218,11 @@ uploadPdfBtn.addEventListener("click", async () => {
     .from("pdfs")
     .upload(fileName, file);
 
-  if (uploadError) return alert("Upload failed: " + uploadError.message);
+  if (uploadError) {
+    uploadPdfBtn.textContent = "Upload PDF";
+    uploadPdfBtn.disabled = false;
+    return alert("Upload failed: " + uploadError.message);
+  }
 
   const { data } = supabase.storage.from("pdfs").getPublicUrl(fileName);
   await supabase.from("pdfs").insert([{ title, url: data.publicUrl }]);
@@ -220,12 +231,11 @@ uploadPdfBtn.addEventListener("click", async () => {
   pdfFileInput.value = "";
   pdfTitleInput.value = "";
   showDashboard();
-
   uploadPdfBtn.textContent = "Upload PDF";
   uploadPdfBtn.disabled = false;
 });
 
-// Whitelist handling
+// --- Whitelist Management (Admin) ---
 addEmailBtn.addEventListener("click", async () => {
   const email = newEmailInput.value.trim();
   if (!email) return;
@@ -235,29 +245,31 @@ addEmailBtn.addEventListener("click", async () => {
 
 async function loadWhitelist() {
   const { data } = await supabase.from("whitelist").select("*");
-  whitelistDisplay.innerHTML = data.map((e) => `<li>${e.email}</li>`).join("");
+  whitelistDisplay.innerHTML = (data || [])
+    .map((e) => `<li>${e.email}</li>`)
+    .join("");
 }
 
-// Utility loaders
+// --- Loading Indicator Util ---
 function showLoading(container, show) {
   if (show) container.insertAdjacentHTML("afterbegin", "<p>Loading PDF...</p>");
   else container.querySelectorAll("p").forEach((e) => e.remove());
 }
 
-// Security Controls
+// --- Security Controls (No Print/Save/Right-Click) ---
 window.addEventListener("contextmenu", (e) => e.preventDefault());
 window.addEventListener("keydown", (e) => {
   if ((e.ctrlKey || e.metaKey) && ["p", "s"].includes(e.key.toLowerCase()))
     e.preventDefault();
 });
-// Try to get the current session directly on page load
+
+// --- Show Session Dashboard if Already Logged In ---
 supabase.auth.getSession().then(({ data: { session } }) => {
-  console.log("Session at load:", session);
   if (session) {
     currentUser = session.user;
     userEmailSpan.textContent = currentUser.email;
     showDashboard();
+  } else {
+    showLogin();
   }
 });
-
-showLogin();
