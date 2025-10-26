@@ -54,8 +54,8 @@ pdfViewerDiv.appendChild(closeBtn);
 let currentUser = null;
 let pdfDoc = null;
 
-// --- Admin Email ---
-const isAdmin = (email) => email === "yadneshsaindane7@gmail.com";
+// --- Admin Email (lowercase for consistency) ---
+const isAdmin = (email) => email.trim().toLowerCase() === "yadneshsaindane7@gmail.com";
 
 // --- UI Show/Hide Functions ---
 function showLogin() {
@@ -92,7 +92,7 @@ loginBtn.addEventListener("click", async () => {
   }
   loginMsg.textContent = "Logging in...";
   loginMsg.style.color = "blue";
-  
+
   const { error } = await supabase.auth.signInWithPassword({
     email,
     password
@@ -105,19 +105,23 @@ loginBtn.addEventListener("click", async () => {
   // Session event will handle the rest
 });
 
-// --- Auth State and Whitelist Check ---
+// --- Auth State and Whitelist Check (with email normalization) ---
 supabase.auth.onAuthStateChange(async (event, session) => {
-  // Debug log
   console.log("Auth state changed:", event, session);
   if (session) {
     currentUser = session.user;
     userEmailSpan.textContent = currentUser.email;
-    // Whitelist check for user
+
+    // Normalize email for whitelist check
+    const normalizedEmail = currentUser.email.trim().toLowerCase();
+    console.log("Normalized email for whitelist check:", normalizedEmail);
+
     const { data, error } = await supabase
       .from("whitelist")
       .select("*")
-      .eq("email", currentUser.email)
+      .eq("email", normalizedEmail)
       .single();
+
     console.log("Whitelist lookup result:", data, "Error:", error);
 
     if (!data && !isAdmin(currentUser.email)) {
@@ -235,11 +239,12 @@ uploadPdfBtn.addEventListener("click", async () => {
   uploadPdfBtn.disabled = false;
 });
 
-// --- Whitelist Management (Admin) ---
+// --- Whitelist Management (Admin) with email normalization ---
 addEmailBtn.addEventListener("click", async () => {
-  const email = newEmailInput.value.trim();
+  const email = newEmailInput.value.trim().toLowerCase();
   if (!email) return;
   await supabase.from("whitelist").insert([{ email }]);
+  newEmailInput.value = "";
   loadWhitelist();
 });
 
@@ -272,4 +277,7 @@ supabase.auth.getSession().then(({ data: { session } }) => {
   } else {
     showLogin();
   }
+}).catch((err) => {
+  console.error("Session fetch error:", err);
+  showLogin();
 });
