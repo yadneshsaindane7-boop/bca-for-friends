@@ -19,7 +19,8 @@ const loginDiv = document.getElementById("login"),
   dashboardDiv = document.getElementById("dashboard"),
   adminPanelDiv = document.getElementById("adminPanel"),
   emailInput = document.getElementById("emailInput"),
-  sendLinkBtn = document.getElementById("sendLinkBtn"),
+  passwordInput = document.getElementById("passwordInput"),
+  loginBtn = document.getElementById("loginBtn"),
   loginMsg = document.getElementById("loginMsg"),
   userEmailSpan = document.getElementById("userEmail"),
   logoutBtn = document.getElementById("logoutBtn"),
@@ -69,20 +70,29 @@ function showAdminPanel() {
 }
 closeBtn.addEventListener("click", showDashboard);
 
-// Magic link
-sendLinkBtn.addEventListener("click", async () => {
+// Password login logic
+loginBtn.addEventListener("click", async () => {
   const email = emailInput.value.trim();
-  if (!email) return (loginMsg.textContent = "Please enter your email");
+  const password = passwordInput.value;
+  if (!email || !password) {
+    loginMsg.textContent = "Please enter your email and password.";
+    loginMsg.style.color = "red";
+    return;
+  }
+  loginMsg.textContent = "Logging in...";
+  loginMsg.style.color = "blue";
 
-  const { error } = await supabase.auth.signInWithOtp({
+  const { error } = await supabase.auth.signInWithPassword({
     email,
-    options: {
-      emailRedirectTo: "https://bca-for-friends.vercel.app",
-    },
+    password,
   });
 
-  if (error) loginMsg.textContent = error.message;
-  else loginMsg.textContent = "Magic link sent! Check your inbox.";
+  if (error) {
+    loginMsg.textContent = "Login failed: " + error.message;
+    loginMsg.style.color = "red";
+    return;
+  }
+  // Auth state monitoring will handle the rest
 });
 
 // Monitor login session
