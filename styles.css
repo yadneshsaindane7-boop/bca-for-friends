@@ -28,7 +28,6 @@ header {
 
 /* Containers */
 #dashboard, #adminPanel, #login, #pdfViewer {
-  display: none;
   margin: 36px auto;
   width: 96%;
   max-width: 540px;
@@ -39,6 +38,10 @@ header {
   backdrop-filter: blur(11px);
   text-align: center;
 }
+
+/* Visibility control classes */
+.hidden { display: none !important; }
+.visible { display: block !important; }
 
 input, button {
   font-family: inherit;
