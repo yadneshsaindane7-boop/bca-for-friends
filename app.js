@@ -42,7 +42,7 @@ if (!loginDiv || !dashboardDiv || !adminPanelDiv) {
 // --- PDF viewer setup ---
 const pdfViewerDiv = document.createElement("div");
 pdfViewerDiv.id = "pdfViewer";
-pdfViewerDiv.style.display = "none";
+pdfViewerDiv.classList.add("hidden");
 document.body.appendChild(pdfViewerDiv);
 
 const closeBtn = document.createElement("button");
@@ -57,25 +57,33 @@ let pdfDoc = null;
 // --- Admin Email (lowercase for consistency) ---
 const isAdmin = (email) => email.trim().toLowerCase() === "yadneshsaindane7@gmail.com";
 
-// --- UI Show/Hide Functions ---
+// --- UI Show/Hide Functions (using classes) ---
 function showLogin() {
-  loginDiv.style.display = "block";
-  dashboardDiv.style.display = "none";
-  adminPanelDiv.style.display = "none";
-  pdfViewerDiv.style.display = "none";
+  loginDiv.classList.add("visible");
+  loginDiv.classList.remove("hidden");
+  dashboardDiv.classList.add("hidden");
+  dashboardDiv.classList.remove("visible");
+  adminPanelDiv.classList.add("hidden");
+  pdfViewerDiv.classList.add("hidden");
+  console.log("Showing login");
 }
 function showDashboard() {
-  loginDiv.style.display = "none";
-  dashboardDiv.style.display = "block";
-  adminPanelDiv.style.display = "none";
-  pdfViewerDiv.style.display = "none";
+  loginDiv.classList.add("hidden");
+  loginDiv.classList.remove("visible");
+  dashboardDiv.classList.add("visible");
+  dashboardDiv.classList.remove("hidden");
+  adminPanelDiv.classList.add("hidden");
+  pdfViewerDiv.classList.add("hidden");
+  console.log("Showing dashboard");
   loadPdfs();
 }
 function showAdminPanel() {
-  loginDiv.style.display = "none";
-  dashboardDiv.style.display = "none";
-  adminPanelDiv.style.display = "block";
-  pdfViewerDiv.style.display = "none";
+  loginDiv.classList.add("hidden");
+  dashboardDiv.classList.add("hidden");
+  adminPanelDiv.classList.add("visible");
+  adminPanelDiv.classList.remove("hidden");
+  pdfViewerDiv.classList.add("hidden");
+  console.log("Showing admin panel");
   loadWhitelist();
 }
 closeBtn.addEventListener("click", showDashboard);
@@ -102,7 +110,6 @@ loginBtn.addEventListener("click", async () => {
     loginMsg.style.color = "red";
     return;
   }
-  // Session event will handle the rest
 });
 
 // --- Auth State and Whitelist Check (with email normalization) ---
@@ -112,7 +119,6 @@ supabase.auth.onAuthStateChange(async (event, session) => {
     currentUser = session.user;
     userEmailSpan.textContent = currentUser.email;
 
-    // Normalize email for whitelist check
     const normalizedEmail = currentUser.email.trim().toLowerCase();
     console.log("Normalized email for whitelist check:", normalizedEmail);
 
@@ -172,9 +178,10 @@ async function viewPdf(url) {
 
   const loadingTask = window.pdfjsLib.getDocument(url);
   pdfDoc = await loadingTask.promise;
+  pdfViewerDiv.classList.remove("hidden");
   pdfViewerDiv.style.display = "flex";
-  dashboardDiv.style.display = "none";
-  adminPanelDiv.style.display = "none";
+  dashboardDiv.classList.add("hidden");
+  adminPanelDiv.classList.add("hidden");
 
   pdfViewerDiv.querySelectorAll("canvas.pageCanvas").forEach((c) => c.remove());
 
@@ -239,7 +246,7 @@ uploadPdfBtn.addEventListener("click", async () => {
   uploadPdfBtn.disabled = false;
 });
 
-// --- Whitelist Management (Admin) with email normalization ---
+// --- Whitelist Management (Admin) ---
 addEmailBtn.addEventListener("click", async () => {
   const email = newEmailInput.value.trim().toLowerCase();
   if (!email) return;
@@ -261,7 +268,7 @@ function showLoading(container, show) {
   else container.querySelectorAll("p").forEach((e) => e.remove());
 }
 
-// --- Security Controls (No Print/Save/Right-Click) ---
+// --- Security Controls ---
 window.addEventListener("contextmenu", (e) => e.preventDefault());
 window.addEventListener("keydown", (e) => {
   if ((e.ctrlKey || e.metaKey) && ["p", "s"].includes(e.key.toLowerCase()))
