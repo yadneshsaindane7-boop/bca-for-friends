@@ -112,38 +112,62 @@ loginBtn.addEventListener("click", async () => {
   }
 });
 
-// --- Auth State and Whitelist Check (with email normalization) ---
+// --- Auth State and Whitelist Check (with email normalization and better error handling) ---
 supabase.auth.onAuthStateChange(async (event, session) => {
   console.log("Auth state changed:", event, session);
+  
   if (session) {
     currentUser = session.user;
     userEmailSpan.textContent = currentUser.email;
 
     const normalizedEmail = currentUser.email.trim().toLowerCase();
     console.log("Normalized email for whitelist check:", normalizedEmail);
+    console.log("Is admin?", isAdmin(currentUser.email));
 
-    const { data, error } = await supabase
-      .from("whitelist")
-      .select("*")
-      .eq("email", normalizedEmail)
-      .single();
-
-    console.log("Whitelist lookup result:", data, "Error:", error);
-
-    if (!data && !isAdmin(currentUser.email)) {
-      alert("Your email is not whitelisted. Contact admin.");
-      await supabase.auth.signOut();
-      return;
-    }
-
+    // Skip whitelist check for admin
     if (isAdmin(currentUser.email)) {
+      console.log("Admin login detected, bypassing whitelist check");
       adminBtnContainer.innerHTML = `<button id="openAdminBtn">Admin Panel</button>`;
       document
         .getElementById("openAdminBtn")
         .addEventListener("click", showAdminPanel);
-    } else adminBtnContainer.innerHTML = "";
+      showDashboard();
+      return;
+    }
 
-    showDashboard();
+    // For non-admin users, check whitelist
+    try {
+      const { data, error } = await supabase
+        .from("whitelist")
+        .select("*")
+        .eq("email", normalizedEmail)
+        .maybeSingle(); // Use maybeSingle instead of single to avoid error if no match
+
+      console.log("Whitelist lookup result:", data, "Error:", error);
+
+      if (error) {
+        console.error("Whitelist query error:", error);
+        alert("Error checking whitelist. Please contact admin.");
+        await supabase.auth.signOut();
+        return;
+      }
+
+      if (!data) {
+        console.log("Email not found in whitelist");
+        alert("Your email is not whitelisted. Contact admin.");
+        await supabase.auth.signOut();
+        return;
+      }
+
+      console.log("Whitelist check passed for:", normalizedEmail);
+      adminBtnContainer.innerHTML = "";
+      showDashboard();
+      
+    } catch (err) {
+      console.error("Whitelist check exception:", err);
+      alert("Error during login. Please try again.");
+      await supabase.auth.signOut();
+    }
   } else {
     showLogin();
   }
@@ -250,8 +274,18 @@ uploadPdfBtn.addEventListener("click", async () => {
 addEmailBtn.addEventListener("click", async () => {
   const email = newEmailInput.value.trim().toLowerCase();
   if (!email) return;
-  await supabase.from("whitelist").insert([{ email }]);
+  
+  console.log("Adding email to whitelist:", email);
+  const { error } = await supabase.from("whitelist").insert([{ email }]);
+  
+  if (error) {
+    console.error("Error adding email:", error);
+    alert("Error adding email: " + error.message);
+    return;
+  }
+  
   newEmailInput.value = "";
+  alert(`Email ${email} added to whitelist successfully!`);
   loadWhitelist();
 });
 
