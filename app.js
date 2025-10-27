@@ -1,3 +1,4 @@
+const { set: idbSet, get: idbGet, keys: idbKeys, del: idbDel } = window.idbKeyval;
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
 // Supabase config
