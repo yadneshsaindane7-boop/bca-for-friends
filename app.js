@@ -509,6 +509,15 @@ window.viewPdf = async function(url, title) {
   const loadingTask = window.pdfjsLib.getDocument(url);
   pdfDoc = await loadingTask.promise;
   // ... your rendering code ...
+  pdfViewerDiv.innerHTML = `<p><i class="fas fa-spinner fa-spin"></i> Loading PDF...</p>`;
+
+// Add Save for Offline button only if online
+if (navigator.onLine) {
+  pdfViewerDiv.innerHTML += `<button onclick="savePdfOffline('${title}', '${url}')" class="primary-btn" style="margin: 15px 0;">
+    <i class="fas fa-cloud-download-alt"></i> Save for Offline
+  </button>`;
+}
+
 }
 // On dashboard load:
 showOfflinePdfsList();
