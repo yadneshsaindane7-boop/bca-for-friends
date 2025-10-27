@@ -1,5 +1,5 @@
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
-const { set: idbSet, get: idbGet, keys: idbKeys, del: idbDel } = window.idbKeyval;
+
 // Supabase config
 const supabaseUrl = "https://cvyqiwroddbbyqpyuayq.supabase.co";
 const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN2eXFpd3JvZGRiYnlxcHl1YXlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjEyOTU5NTQsImV4cCI6MjA3Njg3MTk1NH0.QT8li2H-32sE66UH2sZIBQlGye0dtfL_-LYgaR6yj8M";
@@ -448,76 +448,3 @@ function updateFooterTime() {
 }
 setInterval(updateFooterTime, 1000);
 updateFooterTime();
-// -- OFFLINE PDF SUPPORT (IndexedDB) --
-const { set: idbSet, get: idbGet, keys: idbKeys, del: idbDel } = idbKeyval;
-
-// Save a PDF from URL using title as key
-async function savePdfOffline(title, url) {
-  try {
-    const response = await fetch(url);
-    const blob = await response.blob();
-    await idbSet(title, blob);
-    alert(`Saved "${title}" for offline use!`);
-    showOfflinePdfsList(); // refresh list
-  } catch (e) {
-    alert("Offline save failed. " + e.message);
-  }
-}
-
-// Get all saved PDF titles
-async function getOfflinePdfTitles() {
-  return await idbKeys();
-}
-
-// Get PDF Blob URL by title
-async function getOfflinePdfUrl(title) {
-  const blob = await idbGet(title);
-  return blob ? URL.createObjectURL(blob) : null;
-}
-
-// List all Offline PDFs in the UI
-async function showOfflinePdfsList() {
-  const offlineListDiv = document.getElementById("offlinePdfList");
-  if(!offlineListDiv) return;
-  const keys = await getOfflinePdfTitles();
-  offlineListDiv.innerHTML = (keys.length === 0) 
-    ? "<p>No offline PDFs yet</p>"
-    : keys.map(title => `
-        <div class="offline-pdf-card">
-          <span>${title}</span>
-          <button onclick="openOfflinePdf('${title}')">Read Offline</button>
-          <button onclick="removeOfflinePdf('${title}')"><i class="fas fa-trash"></i></button>
-        </div>
-      `).join("");
-}
-window.openOfflinePdf = async function(title) {
-  const url = await getOfflinePdfUrl(title);
-  url ? openPdfURL(url, title) : alert("PDF not cached offline.");
-};
-window.removeOfflinePdf = async function(title) {
-  await idbDel(title);
-  showOfflinePdfsList();
-};
-
-// Modify your PDF view logic to offer "Save Offline" when online
-window.viewPdf = async function(url, title) {
-  // ... your analytics/activity code ...
-  pdfViewerDiv.innerHTML = `<p><i class="fas fa-spinner fa-spin"></i> Loading PDF...</p>`;
-  if(navigator.onLine) {
-    pdfViewerDiv.innerHTML += `<button onclick="savePdfOffline('${title}', '${url}')">Save for Offline</button>`;
-  }
-  const loadingTask = window.pdfjsLib.getDocument(url);
-  pdfDoc = await loadingTask.promise;
-  // ... your rendering code ...
-  pdfViewerDiv.innerHTML = `<p><i class="fas fa-spinner fa-spin"></i> Loading PDF...</p>`;
-
-// Add Save for Offline button only if online
-if (navigator.onLine) {
-  pdfViewerDiv.innerHTML += `<button onclick="savePdfOffline('${title}', '${url}')" class="primary-btn" style="margin: 15px 0;">
-    <i class="fas fa-cloud-download-alt"></i> Save for Offline
-  </button>`;
-}
-
-}
-// On dashboard load:
-showOfflinePdfsList();
