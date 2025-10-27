@@ -5,43 +5,133 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>BCA Vault - A Hibro Labs Venture</title>
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body>
-  <header>BCA Vault - A Hibro Labs Venture</header>
+<body class="light-mode">
+  <header>
+    <div class="header-content">
+      <h1>BCA Vault - A Hibro Labs Venture</h1>
+      <button id="darkModeToggle" class="icon-btn" title="Toggle Dark Mode">
+        <i class="fas fa-moon"></i>
+      </button>
+    </div>
+  </header>
 
-  <!-- Login Section (visible by default) -->
-  <div id="login" class="visible">
-    <h2>Login with your email & password</h2>
+  <!-- Login Section (starts hidden, shown by JS) -->
+  <div id="login" class="hidden">
+    <div class="login-header">
+      <i class="fas fa-lock"></i>
+      <h2>Login with your email & password</h2>
+    </div>
     <input type="email" id="emailInput" placeholder="Enter your email" autocomplete="username">
     <input type="password" id="passwordInput" placeholder="Enter password" autocomplete="current-password">
-    <button id="loginBtn">Login</button>
+    <button id="loginBtn" class="primary-btn">
+      <i class="fas fa-sign-in-alt"></i> Login
+    </button>
     <p id="loginMsg"></p>
-    <small>Use the credentials provided by the admin.</small>
+    <small><i class="fas fa-info-circle"></i> Use the credentials provided by the admin.</small>
   </div>
 
-  <!-- Dashboard (hidden by default) -->
+  <!-- Dashboard (starts hidden) -->
   <div id="dashboard" class="hidden">
-    <h2>Welcome, <span id="userEmail"></span></h2>
-    <button id="logoutBtn">Logout</button>
+    <div class="dashboard-header">
+      <div class="user-info">
+        <i class="fas fa-user-circle"></i>
+        <h2>Welcome, <span id="userNickname"></span>!</h2>
+      </div>
+      <div class="dashboard-actions">
+        <button id="profileBtn" class="icon-btn" title="Profile">
+          <i class="fas fa-id-card"></i>
+        </button>
+        <button id="logoutBtn" class="icon-btn" title="Logout">
+          <i class="fas fa-sign-out-alt"></i>
+        </button>
+      </div>
+    </div>
     <div id="adminBtnContainer"></div>
     <div id="pdfList" class="grid"></div>
   </div>
 
-  <!-- Admin Panel (hidden by default) -->
+  <!-- User Profile Modal -->
+  <div id="profileModal" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2><i class="fas fa-user"></i> Your Profile</h2>
+        <button class="close-btn" id="closeProfileBtn">&times;</button>
+      </div>
+      <div class="profile-info">
+        <p><strong>Email:</strong> <span id="profileEmail"></span></p>
+        <p><strong>Nickname:</strong> <span id="profileNickname"></span></p>
+        <p><strong>Member Since:</strong> <span id="profileJoined"></span></p>
+      </div>
+      <h3><i class="fas fa-history"></i> Recent Activity</h3>
+      <div id="userActivityList"></div>
+    </div>
+  </div>
+
+  <!-- Admin Panel (starts hidden) -->
   <div id="adminPanel" class="hidden">
-    <h2>Admin Panel</h2>
-    <button id="backToDashboardBtn">Back to Dashboard</button>
+    <div class="admin-header">
+      <h2><i class="fas fa-user-shield"></i> Admin Panel</h2>
+      <button id="backToDashboardBtn" class="secondary-btn">
+        <i class="fas fa-arrow-left"></i> Back to Dashboard
+      </button>
+    </div>
+
+    <!-- Analytics Dashboard -->
+    <section class="analytics-section">
+      <h3><i class="fas fa-chart-line"></i> Analytics Dashboard</h3>
+      <div class="analytics-grid">
+        <div class="stat-card">
+          <i class="fas fa-users"></i>
+          <h4>Total Users</h4>
+          <p id="totalUsers">0</p>
+        </div>
+        <div class="stat-card">
+          <i class="fas fa-file-pdf"></i>
+          <h4>Total PDFs</h4>
+          <p id="totalPdfs">0</p>
+        </div>
+        <div class="stat-card">
+          <i class="fas fa-eye"></i>
+          <h4>Total Views</h4>
+          <p id="totalViews">0</p>
+        </div>
+        <div class="stat-card">
+          <i class="fas fa-clock"></i>
+          <h4>Recent Activity</h4>
+          <p id="recentActivity">0</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Upload PDF -->
     <section>
-      <h3>Upload PDF</h3>
+      <h3><i class="fas fa-upload"></i> Upload PDF</h3>
       <input type="text" id="pdfTitle" placeholder="Enter PDF Title">
       <input type="file" id="pdfFile" accept="application/pdf">
-      <button id="uploadPdfBtn">Upload PDF</button>
+      <button id="uploadPdfBtn" class="primary-btn">
+        <i class="fas fa-cloud-upload-alt"></i> Upload PDF
+      </button>
     </section>
+
+    <!-- User Management -->
     <section>
-      <h3>Manage Whitelisted Users</h3>
-      <input type="email" id="newEmailInput" placeholder="Add email">
-      <button id="addEmailBtn">Add Email</button>
-      <ul id="whitelistDisplay"></ul>
+      <h3><i class="fas fa-users-cog"></i> User Management</h3>
+      <div class="user-management">
+        <input type="email" id="newUserEmail" placeholder="User email">
+        <input type="text" id="newUserNickname" placeholder="Nickname (e.g., Darling, Boss)">
+        <button id="addUserBtn" class="primary-btn">
+          <i class="fas fa-user-plus"></i> Add User
+        </button>
+      </div>
+      <div id="userManagementList"></div>
+    </section>
+
+    <!-- Activity Logs -->
+    <section>
+      <h3><i class="fas fa-list"></i> All Activity Logs</h3>
+      <div id="activityLogsList"></div>
     </section>
   </div>
 
