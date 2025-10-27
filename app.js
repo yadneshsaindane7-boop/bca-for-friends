@@ -416,3 +416,35 @@ uploadPdfBtn.addEventListener("click", async () => {
     if (!session) showLogin();
   });
 });
+// --- Footer Modal (Creator Info) ---
+const showYadneshInfo = document.getElementById('showYadneshInfo');
+const creatorModal = document.getElementById('creatorModal');
+const closeCreatorModal = document.getElementById('closeCreatorModal');
+
+showYadneshInfo.addEventListener('click', (e) => {
+  e.preventDefault();
+  creatorModal.classList.remove('hidden');
+});
+
+closeCreatorModal.addEventListener('click', () => {
+  creatorModal.classList.add('hidden');
+});
+
+window.addEventListener('click', (event) => {
+  if (event.target === creatorModal) {
+    creatorModal.classList.add('hidden');
+  }
+});
+
+// --- Real-Time Date and Time ---
+function updateFooterTime() {
+  const footerTime = document.getElementById('footerTime');
+  const now = new Date();
+  const options = { weekday: "long", year: "numeric", month: "long", day: "numeric" };
+  footerTime.textContent =
+    now.toLocaleTimeString() +
+    " | " +
+    now.toLocaleDateString(undefined, options);
+}
+setInterval(updateFooterTime, 1000);
+updateFooterTime();
