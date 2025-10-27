@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>BCA Vault - A Hibro Labs Venture</title>
-  <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script src="https://unpkg.com/idb-keyval@6/dist/idb-keyval.iife.js"></script>
 </head>
 <body class="light-mode">
   <header>
@@ -17,14 +19,14 @@
     </div>
   </header>
 
-  <!-- Login Section (starts hidden, shown by JS) -->
+  <!-- Login Section (hidden initially) -->
   <div id="login" class="hidden">
     <div class="login-header">
       <i class="fas fa-lock"></i>
       <h2>Login with your email & password</h2>
     </div>
-    <input type="email" id="emailInput" placeholder="Enter your email" autocomplete="username">
-    <input type="password" id="passwordInput" placeholder="Enter password" autocomplete="current-password">
+    <input type="email" id="emailInput" placeholder="Enter your email" autocomplete="username" />
+    <input type="password" id="passwordInput" placeholder="Enter password" autocomplete="current-password" />
     <button id="loginBtn" class="primary-btn">
       <i class="fas fa-sign-in-alt"></i> Login
     </button>
@@ -32,7 +34,7 @@
     <small><i class="fas fa-info-circle"></i> Use the credentials provided by the admin.</small>
   </div>
 
-  <!-- Dashboard (starts hidden) -->
+  <!-- Dashboard Section -->
   <div id="dashboard" class="hidden">
     <div class="dashboard-header">
       <div class="user-info">
@@ -50,6 +52,13 @@
     </div>
     <div id="adminBtnContainer"></div>
     <div id="pdfList" class="grid"></div>
+    
+    <!-- Offline PDFs Section -->
+    <section id="offlinePdfsSection" style="margin-top:40px;">
+      <h3><i class="fas fa-cloud"></i> Offline PDFs</h3>
+      <div id="offlinePdfList"><p>Loading offline PDFs...</p></div>
+    </section>
+    
   </div>
 
   <!-- User Profile Modal -->
@@ -69,7 +78,7 @@
     </div>
   </div>
 
-  <!-- Admin Panel (starts hidden) -->
+  <!-- Admin Panel -->
   <div id="adminPanel" class="hidden">
     <div class="admin-header">
       <h2><i class="fas fa-user-shield"></i> Admin Panel</h2>
@@ -108,8 +117,8 @@
     <!-- Upload PDF -->
     <section>
       <h3><i class="fas fa-upload"></i> Upload PDF</h3>
-      <input type="text" id="pdfTitle" placeholder="Enter PDF Title">
-      <input type="file" id="pdfFile" accept="application/pdf">
+      <input type="text" id="pdfTitle" placeholder="Enter PDF Title" />
+      <input type="file" id="pdfFile" accept="application/pdf" />
       <button id="uploadPdfBtn" class="primary-btn">
         <i class="fas fa-cloud-upload-alt"></i> Upload PDF
       </button>
@@ -119,8 +128,8 @@
     <section>
       <h3><i class="fas fa-users-cog"></i> User Management</h3>
       <div class="user-management">
-        <input type="email" id="newUserEmail" placeholder="User email">
-        <input type="text" id="newUserNickname" placeholder="Nickname (e.g., Darling, Boss)">
+        <input type="email" id="newUserEmail" placeholder="User email" />
+        <input type="text" id="newUserNickname" placeholder="Nickname (e.g., Darling, Boss)" />
         <button id="addUserBtn" class="primary-btn">
           <i class="fas fa-user-plus"></i> Add User
         </button>
@@ -136,39 +145,40 @@
   </div>
 
   <script type="module" src="app.js"></script>
+
+  <!-- Footer -->
   <footer id="siteFooter">
-  <div>
-    Created By :
-    <a href="#" id="showYadneshInfo">Yadnesh Saindane</a>
-  </div>
-  <div>A Hibro-Labs Production.</div>
-  <div id="footerTime"></div>
-</footer>
+    <div>
+      Created By :
+      <a href="#" id="showYadneshInfo">Yadnesh Saindane</a>
+    </div>
+    <div>A Hibro-Labs Production.</div>
+    <div id="footerTime"></div>
+  </footer>
 
-<!-- Modal for creator info -->
-<div id="creatorModal" class="modal hidden">
-  <div class="modal-content">
-    <h3>Yadnesh Saindane</h3>
-    <ul>
-      <li>
-        <a href="https://github.com/yadneshsaindane7-boop" target="_blank">
-          <i class="fab fa-github"></i> GitHub
-        </a>
-      </li>
-      <li>
-        <a href="https://www.instagram.com/283march?igsh=MW00cnNqeXN4Y2o1ZA==" target="_blank">
-          <i class="fab fa-instagram"></i> Instagram
-        </a>
-      </li>
-      <li>
-        <a href="mailto:yadneshsaindane7@gmail.com" target="_blank">
-          <i class="fas fa-envelope"></i> Gmail
-        </a>
-      </li>
-    </ul>
-    <button class="close-btn" id="closeCreatorModal">&times;</button>
+  <!-- Modal for creator info -->
+  <div id="creatorModal" class="modal hidden">
+    <div class="modal-content">
+      <h3>Yadnesh Saindane</h3>
+      <ul>
+        <li>
+          <a href="https://github.com/yadneshsaindane7-boop" target="_blank"
+            ><i class="fab fa-github"></i> GitHub</a
+          >
+        </li>
+        <li>
+          <a href="https://www.instagram.com/283march?igsh=MW00cnNqeXN4Y2o1ZA==" target="_blank"
+            ><i class="fab fa-instagram"></i> Instagram</a
+          >
+        </li>
+        <li>
+          <a href="mailto:yadneshsaindane7@gmail.com" target="_blank"
+            ><i class="fas fa-envelope"></i> Gmail</a
+          >
+        </li>
+      </ul>
+      <button class="close-btn" id="closeCreatorModal">&times;</button>
+    </div>
   </div>
-</div>
-
 </body>
 </html>
