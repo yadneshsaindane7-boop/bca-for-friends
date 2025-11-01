@@ -214,44 +214,54 @@ window.addEventListener('load', () => {
   }
 
   window.viewPdf = async (url, title) => {
-    await supabase.from("activity_logs").insert([{ user_email: currentUser.email, pdf_title: title, action: "Viewed" }]);
-    
-    pdfViewerDiv.innerHTML = '<p><i class="fas fa-spinner fa-spin"></i> Loading PDF...</p>';
-    const loadingTask = window.pdfjsLib.getDocument(url);
-    pdfDoc = await loadingTask.promise;
-    pdfViewerDiv.style.display = "flex";
-    dashboardDiv.className = "hidden";
-    adminPanelDiv.className = "hidden";
+  await supabase.from("activity_logs").insert([{ user_email: currentUser.email, pdf_title: title, action: "Viewed" }]);
 
-    pdfViewerDiv.innerHTML = "";
-    pdfViewerDiv.appendChild(closeBtn);
+  pdfViewerDiv.innerHTML = '<p><i class="fas fa-spinner fa-spin"></i> Loading PDF...</p>';
+  const loadingTask = window.pdfjsLib.getDocument(url);
+  pdfDoc = await loadingTask.promise;
+  pdfViewerDiv.style.display = "flex";
+  dashboardDiv.className = "hidden";
+  adminPanelDiv.className = "hidden";
 
-    for (let num = 1; num <= pdfDoc.numPages; num++) {
-      const page = await pdfDoc.getPage(num);
-      const viewport = page.getViewport({ scale: 1.2 });
-      const canvas = document.createElement("canvas");
-      canvas.className = "pageCanvas";
-      canvas.width = viewport.width;
-      canvas.height = viewport.height;
+  pdfViewerDiv.innerHTML = "";
+  pdfViewerDiv.appendChild(closeBtn);
 
-      const ctx = canvas.getContext("2d");
-      ctx.fillStyle = "#fff";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      await page.render({ canvasContext: ctx, viewport }).promise;
+  // Render the first page immediately
+  const firstPage = await pdfDoc.getPage(1);
+  renderPage(firstPage);
 
-      ctx.globalAlpha = 0.3;
-      ctx.font = "bold 38px Arial";
-      ctx.fillStyle = "#c62828";
-      ctx.save();
-      ctx.translate(viewport.width / 2, viewport.height / 2);
-      ctx.rotate(-0.3);
-      ctx.textAlign = "center";
-      ctx.fillText(currentUser.email, 0, 0);
-      ctx.restore();
+  // Render remaining pages asynchronously
+  for (let num = 2; num <= pdfDoc.numPages; num++) {
+    pdfDoc.getPage(num).then(page => renderPage(page));
+  }
 
-      pdfViewerDiv.insertBefore(canvas, closeBtn);
-    }
-  };
+  function renderPage(page) {
+    const viewport = page.getViewport({ scale: 1.2 });
+    const canvas = document.createElement("canvas");
+    canvas.className = "pageCanvas";
+    canvas.width = viewport.width;
+    canvas.height = viewport.height;
+
+    const ctx = canvas.getContext("2d");
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    page.render({ canvasContext: ctx, viewport });
+
+    // Optional watermark text
+    ctx.globalAlpha = 0.3;
+    ctx.font = "bold 38px Arial";
+    ctx.fillStyle = "#c62828";
+    ctx.save();
+    ctx.translate(viewport.width / 2, viewport.height / 2);
+    ctx.rotate(-0.3);
+    ctx.textAlign = "center";
+    ctx.fillText(currentUser.email, 0, 0);
+    ctx.restore();
+
+    pdfViewerDiv.insertBefore(canvas, closeBtn);
+  }
+};
+
 
   closeBtn.addEventListener("click", () => showDashboard());
   backToDashboardBtn?.addEventListener("click", showDashboard);
