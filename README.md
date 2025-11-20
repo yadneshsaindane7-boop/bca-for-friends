@@ -1,4 +1,4 @@
-![Landing Page](bca_vault.jpg)
+![Landing Page](main_page.jpg)
 
 # BCA Vault - A Hibro Labs Venture
 
