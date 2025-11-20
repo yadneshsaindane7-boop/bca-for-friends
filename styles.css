@@ -1,32 +1,34 @@
-:root {
-  --bg-gradient-start: #f9fbe7;
-  --bg-gradient-end: #ffe6e6;
-  --card-bg: #fff9f9;
-  --text-color: #1d3536;
-  --primary: #68a691;
-  --primary-hover: #ff6b5f;
-  --shadow: rgba(0, 0, 0, 0.12);
-  --border-color: #cbdad1;
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
 }
 
-/* Dark mode palette */
+:root {
+  --bg-gradient-start: #F3E8FF;      
+  --bg-gradient-end: #EEE4FF;       
+  --card-bg: rgba(255, 255, 255, 0.82); 
+  --text-color: #1E1B4B;            
+  --primary: #7C3AED;                
+  --primary-hover: #6D28D9;          
+  --border-color: #CEC8F5;           
+  --shadow: rgba(0, 0, 0, 0.12);
+}
+
 .dark-mode {
   --bg-gradient-start: #111827;
   --bg-gradient-end: #020617;
   --card-bg: #0f172a;
   --text-color: #e5e7eb;
-  --primary: #38bdf8;       /* sky blue accent */
-  --primary-hover: #f97316; /* warm orange hover */
-  --shadow: rgba(0, 0, 0, 0.6);
-  --border-color: #1f2937;
-}
 
-/* Reset */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  -webkit-tap-highlight-color: transparent;
+ 
+  --primary: #38bdf8;       
+  --primary-hover: #f97316;
+
+  --border-color: #1f2937;
+  --shadow: rgba(0, 0, 0, 0.6);
 }
 
 body {
@@ -44,10 +46,9 @@ body {
   transition: background 0.3s ease, color 0.3s ease;
 }
 
-/* Header */
 header {
   background: var(--primary);
-  color: #fdf2f2;
+  color: #ffffff;
   padding: 14px 20px;
   box-shadow: 0 4px 16px var(--shadow);
   position: sticky;
@@ -80,11 +81,10 @@ header h1 {
 }
 
 #darkModeToggle:hover {
-  background: rgba(0, 0, 0, 0.15);
-  transform: translateY(-1px);
+  background: rgba(255,255,255,0.18);
+  transform: translateY(-2px);
 }
 
-/* Layout containers */
 #dashboard,
 #adminPanel,
 #login {
@@ -99,15 +99,9 @@ header h1 {
   border: 1px solid var(--border-color);
 }
 
-/* Visibility helpers */
-.hidden {
-  display: none !important;
-}
-.visible {
-  display: block !important;
-}
+.hidden { display: none !important; }
+.visible { display: block !important; }
 
-/* Login */
 .login-header {
   text-align: center;
   margin-bottom: 20px;
@@ -140,10 +134,9 @@ input {
 
 input:focus {
   border-color: var(--primary);
-  box-shadow: 0 0 0 2px rgba(104, 166, 145, 0.18);
+  box-shadow: 0 0 0 2px rgba(124,58,237,0.25);
 }
 
-/* Buttons */
 button {
   cursor: pointer;
   font-weight: 600;
@@ -151,18 +144,18 @@ button {
 
 .primary-btn {
   background: linear-gradient(135deg, var(--primary), var(--primary-hover));
-  color: #111827;
+  color: #ffffff;
   box-shadow: 0 4px 12px var(--shadow);
   display: inline-flex;
   align-items: center;
   gap: 6px;
   border: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .primary-btn:hover {
-  transform: translateY(-1px);
+  transform: translateY(-2px);
   box-shadow: 0 6px 18px var(--shadow);
-  color: #f9fafb;
 }
 
 .secondary-btn {
@@ -186,13 +179,6 @@ button {
   background: rgba(148, 163, 184, 0.12);
 }
 
-/* Smaller buttons inside toolbar */
-.small-btn {
-  padding: 8px 10px;
-  font-size: 0.85rem;
-}
-
-/* Dashboard header */
 .dashboard-header {
   display: flex;
   justify-content: space-between;
@@ -218,7 +204,7 @@ button {
   gap: 6px;
 }
 
-/* Grid for PDFs */
+
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
@@ -232,7 +218,7 @@ button {
   padding: 16px;
   box-shadow: 0 4px 14px var(--shadow);
   transition: all 0.2s ease;
-  border: 1px solid transparent;
+  border: 1px solid var(--border-color);
 }
 
 .pdf-card:hover {
@@ -252,7 +238,7 @@ button {
   margin-top: 10px;
 }
 
-/* Modal */
+
 .modal {
   position: fixed;
   inset: 0;
@@ -297,7 +283,7 @@ button {
   background: rgba(148, 163, 184, 0.16);
 }
 
-/* Admin Panel */
+
 .admin-header {
   display: flex;
   justify-content: space-between;
@@ -312,7 +298,7 @@ section {
   padding: 18px 16px;
   background: var(--card-bg);
   border-radius: 14px;
-  border-left: 3px solid var(--primary);
+  border-left: 4px solid var(--primary);
 }
 
 section h3 {
@@ -323,7 +309,6 @@ section h3 {
   gap: 8px;
 }
 
-/* Analytics cards */
 .analytics-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(185px, 1fr));
@@ -358,13 +343,13 @@ section h3 {
   color: var(--primary);
 }
 
-/* Activity logs */
+
 .activity-item {
   background: var(--card-bg);
   padding: 10px 12px;
   margin: 6px 0;
   border-radius: 10px;
-  border-left: 3px solid var(--primary);
+  border-left: 4px solid var(--primary);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -372,7 +357,7 @@ section h3 {
   gap: 6px;
 }
 
-/* User management */
+
 .user-card {
   background: var(--card-bg);
   padding: 12px;
@@ -416,7 +401,7 @@ section h3 {
   background: #b91c1c;
 }
 
-/* PDF Viewer */
+
 #pdfViewer {
   position: fixed;
   inset: 0;
@@ -425,7 +410,7 @@ section h3 {
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  background: rgba(0, 0, 0, 0.9);
+  background: rgba(0, 0, 0, 0.92);
   overflow-y: auto;
   padding: 18px 0 60px 0;
 }
@@ -433,7 +418,7 @@ section h3 {
 #pdfViewer .pageCanvas {
   border-radius: 12px;
   box-shadow: 0 10px 32px rgba(0, 0, 0, 0.6);
-  border: 1px solid #111827;
+  border: 1px solid #1E293B;
   background: #ffffff;
 }
 
@@ -444,9 +429,9 @@ section h3 {
   z-index: 10001;
 }
 
-/* Footer */
+
 footer#siteFooter {
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.88);
   color: var(--text-color);
   margin-top: auto;
   padding: 14px 0 12px 0;
@@ -477,10 +462,7 @@ footer#siteFooter {
   opacity: 0.8;
 }
 
-/* Creator modal list */
-.modal-content h3 {
-  margin-top: 0;
-}
+.modal-content h3 { margin-top: 0; }
 
 .modal-content ul {
   list-style: none;
@@ -503,10 +485,10 @@ footer#siteFooter {
   text-decoration: underline;
 }
 
-/* Responsive tweaks */
 @media (max-width: 768px) {
+
   header h1 {
-    font-size: 1.25rem;
+    font-size: 1.22rem;
   }
 
   .dashboard-header,
