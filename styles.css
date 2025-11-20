@@ -31,6 +31,7 @@
   --shadow: rgba(0, 0, 0, 0.6);
 }
 
+
 body {
   font-family: 'Nunito', 'Quicksand', Arial, sans-serif;
   min-height: 100vh;
@@ -519,3 +520,33 @@ footer#siteFooter {
   }
 }
 
+/* Logo + Title Layout */
+.logo-title {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.site-logo {
+  height: 42px;
+  width: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 3px rgba(0,0,0,0.25));
+  border-radius: 8px;
+  transition: transform 0.25s ease;
+}
+
+.site-logo:hover {
+  transform: scale(1.04);
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .site-logo {
+    height: 34px;
+  }
+
+  .logo-title h1 {
+    font-size: 1.10rem;
+  }
+}
